@@ -1,62 +1,66 @@
 import requests
 import logging
+import random
 from typing import Optional, Dict, List
 
 logger = logging.getLogger(__name__)
 
 class VintedAPI:
-    def __init__(self, country_code=".fr"):  # Changé en .fr vu tes logs
+    def __init__(self, country_code=".fr"):
         self.country_code = country_code
         self.session = requests.Session()
         self.token: Optional[str] = None
         self.base_url = f"https://www.vinted{country_code}"
     
-    def _get_headers(self, with_auth: bool = False) -> Dict:
-        headers = {
+    def _get_headers(self) -> Dict:
+        # On imite parfaitement l'application mobile officielle de Vinted
+        return {
             'Host': f'www.vinted{self.country_code}',
             'x-app-version': '24.43.1',
-            'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8',
+            'accept': 'application/json',
             'accept-language': 'fr-FR,fr;q=0.9',
-            'user-agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.5 Mobile/15E148 Safari/604.1',
+            'user-agent': 'vinted-ios Vinted/24.43.1 (lt.manodrabuziai.fr; build:30115; iOS 17.5) iPhone14,3',
+            'x-device-model': 'iPhone14,3',
+            'connection': 'keep-alive'
         }
 
-        if with_auth and self.token:
-            headers['authorization'] = f'Bearer {self.token}'
-            
-        return headers
-
     def _fetch_cookies(self):
-        """Simule une visite sur la page d'accueil pour récupérer les cookies anti-bot"""
+        """Simule l'ouverture de l'application pour choper les cookies"""
         try:
-            headers = self._get_headers(with_auth=False)
+            headers = self._get_headers()
+            # On va sur la page d'accueil d'abord
             self.session.get(self.base_url, headers=headers, timeout=10)
-            logger.info("Cookies Vinted récupérés avec succès.")
+            logger.info("Cookies de session mobiles récupérés.")
         except Exception as e:
-            logger.error(f"Impossible de récupérer les cookies: {str(e)}")
+            logger.error(f"Erreur cookies: {str(e)}")
     
     async def search_products(self, search_text: str) -> List[Dict]:
         try:
-            # Si on n'a pas encore de cookies, on va les chercher
             if not self.session.cookies:
                 self._fetch_cookies()
 
+            # Paramètres officiels de l'application mobile
             params = {
-                'page': '1',
-                'per_page': '10',
                 'search_text': search_text,
+                'page': '1',
+                'per_page': '20',
                 'order': 'newest_first',
             }
         
-            # On change temporairement l'acceptation pour l'API
-            headers = self._get_headers(with_auth=True)
-            headers['accept'] = 'application/json'
+            headers = self._get_headers()
 
+            # Requête vers l'API de recherche
             response = self.session.get(
                 f'{self.base_url}/api/v2/catalog/items',
                 params=params,
                 headers=headers,
                 timeout=10
             )
+            
+            if response.status_code == 403:
+                logger.error("Vinted bloque toujours l'IP de ton serveur Render (403).")
+                return []
+                
             response.raise_for_status()
             data = response.json()
             
@@ -68,5 +72,5 @@ class VintedAPI:
             
             return items
         except Exception as e:
-            logger.error(f"Failed to search products: {str(e)}")
+            logger.error(f"Erreur recherche: {str(e)}")
             return []
