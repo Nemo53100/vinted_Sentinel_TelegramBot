@@ -25,9 +25,9 @@ class VintedAPI:
             
         return headers
     
-async def search_products(self, search_text: str) -> List[Dict]:
-    try:
-        params = {
+    async def search_products(self, search_text: str) -> List[Dict]:
+        try:
+            params = {
             'page': '1',
             'per_page': '10',
             'search_text': search_text,
