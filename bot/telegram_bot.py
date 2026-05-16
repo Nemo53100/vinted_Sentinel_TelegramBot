@@ -1,4 +1,5 @@
-from telegram import Bot, ParseMode, InlineKeyboardButton, InlineKeyboardMarkup
+from telegram import Bot, InlineKeyboardButton
+from telegram.constants import ParseMode
 from telegram.error import TelegramError
 import logging
 
