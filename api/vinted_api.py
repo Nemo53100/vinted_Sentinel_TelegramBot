@@ -19,24 +19,7 @@ class VintedAPI:
             'x-device-model': 'iPad13,6'
         }
 
-            def search_products(self, query):
-        url = f"{self.base_url}/api/v2/catalog/items"
-
-        params = {
-            "search_text": query,
-            "per_page": 10
-        }
-
-        response = self.session.get(
-            url,
-            params=params,
-            headers=self._get_headers()
-        )
-
-        if response.status_code == 200:
-            return response.json().get("items", [])
-
-        return []
+        
         if with_auth and self.token:
             headers['authorization'] = f'Bearer {self.token}'
             
