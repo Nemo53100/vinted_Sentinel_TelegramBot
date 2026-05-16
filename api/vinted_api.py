@@ -19,7 +19,6 @@ class VintedAPI:
             'x-device-model': 'iPad13,6'
         }
 
-        
         if with_auth and self.token:
             headers['authorization'] = f'Bearer {self.token}'
             
@@ -28,28 +27,28 @@ class VintedAPI:
     async def search_products(self, search_text: str) -> List[Dict]:
         try:
             params = {
-            'page': '1',
-            'per_page': '10',
-            'search_text': search_text,
-            'order': 'newest_first',
-        }
+                'page': '1',
+                'per_page': '10',
+                'search_text': search_text,
+                'order': 'newest_first',
+            }
         
-        response = self.session.get(
-            f'{self.base_url}/api/v2/catalog/items',
-            params=params,
-            headers=self._get_headers(with_auth=True)
-        )
-        response.raise_for_status()
-        data = response.json()
-        
-        # Estrazione dell'URL dell'immagine, se disponibile
-        items = []
-        for item in data.get('items', []):
-            image_url = item.get('photos', [{}])[0].get('url', None)
-            item['image_url'] = image_url  # Aggiungi l'URL dell'immagine all'item
-            items.append(item)
-        
-        return items
-    except Exception as e:
-        logger.error(f"Failed to search products: {str(e)}")
-        return []
+            response = self.session.get(
+                f'{self.base_url}/api/v2/catalog/items',
+                params=params,
+                headers=self._get_headers(with_auth=True)
+            )
+            response.raise_for_status()
+            data = response.json()
+            
+            # Estrazione dell'URL dell'immagine, se disponibile
+            items = []
+            for item in data.get('items', []):
+                image_url = item.get('photos', [{}])[0].get('url', None)
+                item['image_url'] = image_url  # Aggiungi l'URL dell'immagine all'item
+                items.append(item)
+            
+            return items
+        except Exception as e:
+            logger.error(f"Failed to search products: {str(e)}")
+            return []
