@@ -1,10 +1,12 @@
 import requests
 import logging
+from typing import Optional, Dict, List
 
 logger = logging.getLogger(__name__)
 
 class VintedAPI:
     def __init__(self, country_code=".de"):
+        self.country_code = country_code  # Enregistre le pays pour pouvoir l'utiliser partout
         self.session = requests.Session()
         self.token: Optional[str] = None
         self.base_url = f"https://www.vinted{country_code}"  # URL dinamico in base al paese
