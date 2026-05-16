@@ -52,3 +52,21 @@ async def search_products(self, search_text: str) -> List[Dict]:
     except Exception as e:
         logger.error(f"Failed to search products: {str(e)}")
         return []
+    def search_products(self, query):
+        url = f"{self.base_url}/api/v2/catalog/items"
+
+        params = {
+            "search_text": query,
+            "per_page": 10
+        }
+
+        response = self.session.get(
+            url,
+            params=params,
+            headers=self._get_headers()
+        )
+
+        if response.status_code == 200:
+            return response.json().get("items", [])
+
+        return []
